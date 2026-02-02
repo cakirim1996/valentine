@@ -8,7 +8,12 @@
   <style>
     :root{
       --max: 520px;
-      --shake: 0deg;
+
+      /* YES */
+      --yesScale: 1;
+      --shakeDeg: 0deg;
+
+      /* NO slide-away + fade */
       --noX: 0px;
       --noOpacity: 1;
     }
@@ -18,12 +23,12 @@
 
     body{
       margin:0;
-      background:#fff;   /* plain white */
+      background:#fff;
       color:#111;
       font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
       -webkit-font-smoothing: antialiased;
       text-rendering: optimizeLegibility;
-      overflow:hidden;   /* no scroll */
+      overflow:hidden; /* no scroll */
     }
 
     .wrap{
@@ -67,12 +72,16 @@
       margin-top:-4px;
     }
 
+    /* Buttons area */
     .buttons{
       margin-top:6px;
       display:flex;
       gap:12px;
       align-items:center;
       justify-content:center;
+      position: relative;
+      width: min(360px, 92vw);
+      min-height: 54px; /* keeps space stable for teleport */
     }
 
     button{
@@ -86,26 +95,33 @@
       cursor:pointer;
       touch-action: manipulation;
       user-select:none;
+      -webkit-tap-highlight-color: transparent;
     }
     button:active{ transform: scale(.98); }
 
-    /* YES only shakes (no scaling) */
+    /* YES grows + increasingly shakes */
     #yesBtn{
-      transform: rotate(var(--shake));
+      transform: scale(var(--yesScale)) rotate(var(--shakeDeg));
       transform-origin:center;
       will-change: transform;
       transition: transform 140ms ease;
+      z-index: 2;
     }
 
-    /* NO slides out progressively */
+    /* NO: we keep translateX for “slide away”,
+       and use position absolute for teleporting inside .buttons */
     #noBtn{
-      transform: translateX(var(--noX));
+      position:absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(calc(-50% + var(--noX)), -50%);
       opacity: var(--noOpacity);
-      will-change: transform, opacity;
-      transition: transform 160ms ease, opacity 200ms ease;
+      will-change: transform, opacity, left, top;
+      transition: transform 160ms ease, opacity 200ms ease, left 120ms ease, top 120ms ease;
+      z-index: 1;
     }
 
-    /* confetti layer */
+    /* Confetti */
     #confetti{
       position:fixed;
       inset:0;
@@ -145,6 +161,7 @@
 
   <script>
     const root   = document.documentElement;
+
     const yesBtn = document.getElementById("yesBtn");
     const noBtn  = document.getElementById("noBtn");
     const msgEl  = document.getElementById("msg");
@@ -161,45 +178,100 @@
       "Nochmal überlegen bitte 🥺",
       "Das tut weh 💔",
       "Letzte Chance… 😇",
-      "Ok jetzt reicht 😌"
+      "Ok ok… NO geht nicht 😌"
     ];
 
     gifImg.src = START_GIF;
 
     let noClicks = 0;
     let noX = 0;
+    let yesScale = 1;
 
-    // short shake on YES
+    // Increasing shake intensity with noClicks
     let shakeTimer = null;
-    function doShake(){
+    function doShake(intensity){
       if (shakeTimer) return;
       let t = 0;
       shakeTimer = setInterval(() => {
-        const angle = (t % 2 === 0) ? -3 : 3;
-        root.style.setProperty("--shake", angle + "deg");
+        // intensity in degrees, alternate
+        const angle = (t % 2 === 0) ? -intensity : intensity;
+        root.style.setProperty("--shakeDeg", angle + "deg");
         t++;
-        if (t > 8){
+        if (t > 10){
           clearInterval(shakeTimer);
           shakeTimer = null;
-          root.style.setProperty("--shake", "0deg");
+          root.style.setProperty("--shakeDeg", "0deg");
         }
-      }, 55);
+      }, 45); // faster = more “aggressive”
     }
 
-    // NO click: move out + show message + shake YES
+    function clamp(n, min, max){ return Math.max(min, Math.min(max, n)); }
+    function rand(min,max){ return Math.random()*(max-min)+min; }
+
+    // Teleport NO within .buttons area (mobile friendly: keep it not too close to edges)
+    function teleportNo(){
+      const r = btnRow.getBoundingClientRect();
+      const b = noBtn.getBoundingClientRect();
+
+      // keep within container bounds with padding
+      const pad = 10;
+      const minX = pad;
+      const maxX = Math.max(pad, r.width - b.width - pad);
+      const minY = pad;
+      const maxY = Math.max(pad, r.height - b.height - pad);
+
+      // random position, but avoid overlapping the YES button too much
+      let x = rand(minX, maxX);
+      let y = rand(minY, maxY);
+
+      // convert to left/top in px inside container
+      noBtn.style.left = x + "px";
+      noBtn.style.top  = y + "px";
+      // note: transform already handles translate(-50%,-50%) around its anchor,
+      // but because we set left/top in px, we should remove that centering effect:
+      // easiest: switch transform base to direct translateX only when teleported
+    }
+
+    // We'll use a different transform approach to combine teleport + slide:
+    // Set NO to absolute with left/top px, and use translateX(noX) only.
+    // (So we update CSS accordingly via inline style.)
+    function updateNoTransform(){
+      noBtn.style.transform = `translateX(${noX}px)`;
+      noBtn.style.opacity = getComputedStyle(root).getPropertyValue("--noOpacity");
+    }
+
+    // Initialize NO position near center inside row
+    (function initNo(){
+      const r = btnRow.getBoundingClientRect();
+      noBtn.style.left = (r.width * 0.62) + "px";
+      noBtn.style.top  = (r.height * 0.5) + "px";
+      noBtn.style.transform = "translateX(0px)";
+    })();
+
     noBtn.addEventListener("click", () => {
       noClicks++;
 
+      // message
       msgEl.textContent = noMessages[Math.min(noClicks - 1, noMessages.length - 1)];
-      doShake();
 
-      // move NO out step by step (based on screen width)
-      const step = Math.max(26, Math.floor(window.innerWidth * 0.10)); // ~10% screen
+      // YES grows
+      yesScale = clamp(yesScale + 0.18, 1, 3.6);
+      root.style.setProperty("--yesScale", yesScale.toFixed(3));
+
+      // YES shakes more and more
+      const intensity = clamp(2 + noClicks * 0.8, 2, 16); // degrees
+      doShake(intensity);
+
+      // NO slide away (progressively leaves screen)
+      const step = Math.max(26, Math.floor(window.innerWidth * 0.10));
       noX += step;
-      root.style.setProperty("--noX", noX + "px");
 
-      // fade + disable when far enough
-      if (noX > window.innerWidth * 0.60){
+      // TELEPORT NO (still clickable, mobile-friendly)
+      teleportNo();
+      updateNoTransform();
+
+      // eventually fade out & disable
+      if (noX > window.innerWidth * 0.70){
         root.style.setProperty("--noOpacity", "0");
         noBtn.style.pointerEvents = "none";
       }
@@ -220,16 +292,14 @@
     }
     window.addEventListener("resize", resizeCanvas, { passive:true });
 
-    function rand(min,max){ return Math.random()*(max-min)+min; }
-
-    function spawnConfetti(count=220){
+    function spawnConfetti(count=240){
       pieces = [];
       for(let i=0;i<count;i++){
         pieces.push({
           x: rand(0, window.innerWidth),
           y: rand(-window.innerHeight, -20),
           vx: rand(-1.6, 1.6),
-          vy: rand(2.2, 5.2),
+          vy: rand(2.2, 5.5),
           r:  rand(4, 10),
           rot: rand(0, Math.PI*2),
           vr: rand(-0.10, 0.10),
@@ -246,7 +316,7 @@
         p.x += p.vx;
         p.y += p.vy;
         p.rot += p.vr;
-        p.vy *= 1.001;
+        p.vy *= 1.0008;
 
         ctx.save();
         ctx.translate(p.x, p.y);
@@ -255,15 +325,13 @@
         ctx.fillRect(-p.r/2, -p.r/2, p.r, p.r*0.7);
         ctx.restore();
 
-        // respawn from top (infinite)
         if(p.y > window.innerHeight + 30){
           p.y = rand(-140, -20);
           p.x = rand(0, window.innerWidth);
-          p.vy = rand(2.2, 5.2);
+          p.vy = rand(2.2, 5.5);
         }
-        // wrap sideways a bit
-        if(p.x < -20) p.x = window.innerWidth + 20;
-        if(p.x > window.innerWidth + 20) p.x = -20;
+        if(p.x < -30) p.x = window.innerWidth + 30;
+        if(p.x > window.innerWidth + 30) p.x = -30;
       }
 
       rafId = requestAnimationFrame(loop);
@@ -277,14 +345,14 @@
       loop();
     }
 
-    // YES click: swap gif, remove buttons + message, start infinite confetti
+    // YES click
     yesBtn.addEventListener("click", () => {
-      // remove buttons + message line
+      // remove buttons + messages
       btnRow.style.display = "none";
       msgEl.textContent = "";
       msgEl.style.display = "none";
 
-      // update title + gif
+      // swap gif + title
       titleEl.textContent = "Yay 💘";
       gifImg.style.opacity = "1";
       gifImg.src = YES_GIF;
