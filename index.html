@@ -1,343 +1,422 @@
+```html
 <!doctype html>
-<html lang="de">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>Valentine 💘</title>
-
+  <title>Valentine 💖</title>
   <style>
     :root{
-      --max: 520px;
-      --yesScale: 1;
-      --shake: 0deg;
-      --noX: 0px;
-      --noOpacity: 1;
-      --bgA: 0;
+      --yes-scale: 1;
+      --wiggle-deg: 0deg;
+      --card-w: min(92vw, 420px);
+      --btn-h: 52px;
+      --radius: 20px;
+      --shadow: 0 18px 50px rgba(0,0,0,.08);
+      --border: 1px solid rgba(0,0,0,.07);
+      --text: #111;
+      --muted: rgba(0,0,0,.55);
+      --no-x: 0px;
+      --no-opacity: 1;
     }
 
-    *{ box-sizing:border-box; }
-    html, body { height: 100%; }
+    /* Respect reduced motion */
+    @media (prefers-reduced-motion: reduce){
+      *{ animation: none !important; transition: none !important; }
+    }
 
-    body{
-      margin:0;
-      background:#fff;
-      color:#111;
-      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+    html, body{
+      height: 100%;
+      margin: 0;
+      overflow: hidden; /* no scrolling */
+      background: #fff;
+      color: var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
       -webkit-font-smoothing: antialiased;
-      overflow:hidden; /* no scroll */
-      position:relative;
-    }
-
-    /* Disco overlay (hidden until YES) */
-    .disco{
-      position:fixed;
-      inset:0;
-      pointer-events:none;
-      opacity:var(--bgA);
-      transition:opacity .3s ease;
-      background:
-        radial-gradient(circle at 20% 30%, rgba(255,0,150,.55), transparent 35%),
-        radial-gradient(circle at 80% 20%, rgba(0,200,255,.50), transparent 40%),
-        radial-gradient(circle at 70% 80%, rgba(255,230,0,.45), transparent 38%),
-        radial-gradient(circle at 25% 75%, rgba(0,255,140,.45), transparent 40%);
-      mix-blend-mode:screen;
-      animation: discoMove 1.4s linear infinite;
-    }
-    @keyframes discoMove{
-      0%{transform:translate(0,0)}
-      50%{transform:translate(10px,-10px)}
-      100%{transform:translate(0,0)}
+      -moz-osx-font-smoothing: grayscale;
     }
 
     .wrap{
-      min-height:100svh;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:24px 18px;
-      position:relative;
-      z-index:2;
+      height: 100svh;
+      display: grid;
+      place-items: center;
+      padding: 16px;
+      position: relative;
     }
 
     .card{
-      width:min(var(--max),100%);
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      text-align:center;
-      gap:14px;
+      width: var(--card-w);
+      border-radius: calc(var(--radius) + 6px);
+      border: var(--border);
+      box-shadow: var(--shadow);
+      background: #fff;
+      padding: 18px 18px 20px;
+      display: grid;
+      gap: 14px;
+      text-align: center;
+      position: relative;
+      z-index: 2;
     }
 
     .gif{
-      width:min(320px,82vw);
-      border-radius:16px;
-      overflow:hidden;
-      background:#f4f4f4;
-      box-shadow:0 12px 40px rgba(0,0,0,.08);
+      width: 100%;
+      height: 210px;
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: var(--border);
+      background: rgba(0,0,0,.02);
+      display: grid;
+      place-items: center;
     }
-    .gif img{ width:100%; display:block; }
+
+    .gif img{
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
 
     h1{
-      margin:0;
-      font-size:22px;
-      font-weight:800;
+      margin: 2px 0 0;
+      font-size: 1.45rem;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
     }
 
     .msg{
-      min-height:20px;
-      font-size:14px;
-      color:#444;
+      min-height: 1.35em;
+      font-size: .98rem;
+      color: var(--muted);
+      margin-top: -6px;
+      opacity: 0;
+      transform: translateY(-4px);
+      transition: opacity .25s ease, transform .25s ease;
+      user-select: none;
+    }
+    .msg.show{
+      opacity: 1;
+      transform: translateY(0);
     }
 
-    .buttons{
-      display:flex;
-      gap:12px;
-      justify-content:center;
+    .btnRow{
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 2px;
     }
 
     button{
-      border:1px solid #111;
-      background:#fff;
-      padding:10px 16px;
-      border-radius:999px;
-      font-size:16px;
-      font-weight:800;
-      cursor:pointer;
+      height: var(--btn-h);
+      border-radius: 999px;
+      border: var(--border);
+      background: #fff;
+      font-weight: 650;
+      font-size: 1rem;
+      letter-spacing: 0.01em;
+      cursor: pointer;
+      box-shadow: 0 10px 24px rgba(0,0,0,.06);
+      transition: transform .22s ease, box-shadow .22s ease, opacity .22s ease, filter .22s ease;
+      -webkit-tap-highlight-color: transparent;
       touch-action: manipulation;
-      user-select:none;
-      transition: transform 140ms ease;
     }
-    button:active{ transform: scale(0.98); }
-
-    #yesBtn{
-      transform:scale(var(--yesScale)) rotate(var(--shake));
-      transform-origin:center;
-      will-change: transform;
+    button:active{ transform: translateY(1px) scale(.995); }
+    button:focus-visible{
+      outline: 3px solid rgba(255,0,120,.22);
+      outline-offset: 2px;
     }
 
-    #noBtn{
-      transform:translateX(var(--noX));
-      opacity:var(--noOpacity);
-      will-change: transform, opacity;
-      transition:transform .16s ease, opacity .18s ease;
+    .yes{
+      transform: scale(var(--yes-scale)) rotate(var(--wiggle-deg));
+      transform-origin: center;
+      background: linear-gradient(135deg, #ff3d7f, #ff7ab6);
+      color: #fff;
+      border: 0;
+      box-shadow: 0 16px 34px rgba(255, 61, 127, .28);
+    }
+    .yes:hover{ filter: brightness(1.02); }
+
+    .yes.wiggle{
+      animation: wiggle .28s ease-in-out 1;
+    }
+    @keyframes wiggle{
+      0%{ transform: scale(var(--yes-scale)) rotate(0deg); }
+      25%{ transform: scale(var(--yes-scale)) rotate(-2deg); }
+      50%{ transform: scale(var(--yes-scale)) rotate(2deg); }
+      75%{ transform: scale(var(--yes-scale)) rotate(-1deg); }
+      100%{ transform: scale(var(--yes-scale)) rotate(0deg); }
     }
 
-    /* confetti layer */
+    .no{
+      transform: translateX(var(--no-x));
+      opacity: var(--no-opacity);
+      background: #fff;
+      color: #111;
+    }
+    .no.disabled{
+      pointer-events: none;
+      filter: grayscale(1);
+      box-shadow: none;
+    }
+
+    .hidden{
+      display: none !important;
+    }
+
+    /* Disco overlay (appears after YES) */
+    .disco{
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity .4s ease;
+      z-index: 1;
+      mix-blend-mode: multiply;
+      background:
+        radial-gradient(circle at 20% 30%, rgba(255, 0, 128, .28), transparent 35%),
+        radial-gradient(circle at 75% 20%, rgba(0, 200, 255, .26), transparent 35%),
+        radial-gradient(circle at 60% 80%, rgba(255, 200, 0, .26), transparent 35%),
+        radial-gradient(circle at 25% 85%, rgba(140, 255, 0, .20), transparent 40%),
+        radial-gradient(circle at 85% 65%, rgba(180, 120, 255, .24), transparent 40%);
+    }
+    .disco.on{
+      opacity: 1;
+      animation: discoMove 2.2s ease-in-out infinite alternate;
+    }
+    @keyframes discoMove{
+      0%{ filter: hue-rotate(0deg) saturate(1.1); transform: scale(1); }
+      100%{ filter: hue-rotate(60deg) saturate(1.35); transform: scale(1.03); }
+    }
+
+    /* Confetti canvas */
     #confetti{
-      position:fixed;
-      inset:0;
-      width:100%;
-      height:100%;
-      pointer-events:none;
-      z-index:3;
-      opacity:0;
-      transition: opacity .2s ease;
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 3;
+      opacity: 0;
+      transition: opacity .25s ease;
     }
-    #confetti.on{ opacity:1; }
+    #confetti.on{ opacity: 1; }
 
-    @media (prefers-reduced-motion: reduce){
-      .disco{ animation:none; }
-      #noBtn{ transition:none; }
+    /* End screen tweak: keep card clean */
+    .card.celebrate{
+      box-shadow: 0 24px 70px rgba(0,0,0,.10);
+    }
+
+    /* Make sure on very small screens everything fits */
+    @media (max-height: 640px){
+      .gif{ height: 180px; }
+      h1{ font-size: 1.28rem; }
     }
   </style>
 </head>
-
 <body>
-  <div class="disco" aria-hidden="true"></div>
-  <canvas id="confetti" aria-hidden="true"></canvas>
+  <div class="wrap">
+    <div class="disco" id="disco"></div>
+    <canvas id="confetti"></canvas>
 
-  <main class="wrap">
-    <section class="card" aria-label="Valentine question">
-      <div class="gif">
-        <img id="gifImg" src="valentine.gif" alt="Valentine gif"
-             onerror="this.alt='(Füge valentine.gif neben die Datei oder nutze eine URL)'; this.style.opacity=.2;" />
+    <main class="card" id="card" aria-live="polite">
+      <div class="gif" aria-label="Valentine gif">
+        <img id="mainGif" src="valentine.gif" alt="Valentine" />
       </div>
 
-      <h1 id="title">Will you be my valentine? 💘</h1>
+      <h1 id="headline">Will you be my valentine?</h1>
       <div class="msg" id="msg"></div>
 
-      <div class="buttons">
-        <button id="yesBtn">Yes</button>
-        <button id="noBtn">No</button>
+      <div class="btnRow" id="btnRow">
+        <button class="yes" id="yesBtn" type="button">Yes</button>
+        <button class="no" id="noBtn" type="button">No</button>
       </div>
-    </section>
-  </main>
+    </main>
+  </div>
 
-<script>
-  const root = document.documentElement;
+  <script>
+    (function(){
+      const prefersReduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  const yesBtn = document.getElementById("yesBtn");
-  const noBtn  = document.getElementById("noBtn");
-  const msgEl  = document.getElementById("msg");
-  const titleEl= document.getElementById("title");
-  const gifImg = document.getElementById("gifImg");
+      const root = document.documentElement;
+      const yesBtn = document.getElementById("yesBtn");
+      const noBtn  = document.getElementById("noBtn");
+      const msgEl  = document.getElementById("msg");
+      const btnRow = document.getElementById("btnRow");
+      const gif    = document.getElementById("mainGif");
+      const headline = document.getElementById("headline");
+      const disco  = document.getElementById("disco");
+      const card   = document.getElementById("card");
 
-  // GIFs (file next to index.html) or URLs
-  const START_GIF = "valentine.gif";
-  const YES_GIF   = "yay.gif";
+      const messages = [
+        "Sicher?",
+        "Ich glaube du hast dich verdrückt",
+        "Überleg nochmal 🥺",
+        "Das bricht mein Herz 💔",
+        "Letzte Chance 😇",
+        "Ok… aber ich warte trotzdem 😭"
+      ];
 
-  const noMessages = [
-    "Sicher? 🤨",
-    "Ich glaube, du hast dich verdrückt 😭",
-    "Überleg nochmal bitte 🥺",
-    "Das bricht mir das Herz 💔",
-    "Letzte Chance… 😇",
-    "No ist keine Option 😌"
-  ];
+      let noClicks = 0;
 
-  let yesScale = 1;
-  let noClicks = 0;
-  let noX = 0;
-  let shakeTimer = null;
-
-  gifImg.src = START_GIF;
-
-  function clamp(n, min, max){ return Math.max(min, Math.min(max, n)); }
-
-  function doShake(){
-    if (shakeTimer) return;
-    let t = 0;
-    shakeTimer = setInterval(() => {
-      const angle = (t % 2 === 0) ? -3 : 3;
-      root.style.setProperty("--shake", angle + "deg");
-      t++;
-      if (t > 8){
-        clearInterval(shakeTimer);
-        shakeTimer = null;
-        root.style.setProperty("--shake", "0deg");
+      function setVar(name, value){
+        root.style.setProperty(name, value);
       }
-    }, 60);
-  }
 
-  noBtn.addEventListener("click", () => {
-    noClicks++;
+      function pulseYes(){
+        // grow
+        const scale = 1 + Math.min(0.16 * (noClicks + 1), 1.2); // caps growth
+        setVar("--yes-scale", scale.toFixed(3));
 
-    // message
-    msgEl.textContent = noMessages[Math.min(noClicks - 1, noMessages.length - 1)];
+        // wiggle
+        if (!prefersReduced){
+          yesBtn.classList.remove("wiggle");
+          // force reflow to restart animation
+          void yesBtn.offsetWidth;
+          yesBtn.classList.add("wiggle");
+        }
+      }
 
-    // move NO out
-    const step = Math.max(24, Math.floor(window.innerWidth * 0.08));
-    noX += step;
-    root.style.setProperty("--noX", noX + "px");
+      function moveNo(){
+        // slide out step-by-step
+        const step = 46; // px
+        const x = step * (noClicks + 1);
+        setVar("--no-x", x + "px");
 
-    // grow YES + shake
-    yesScale = clamp(yesScale + 0.22, 1, 3.8);
-    root.style.setProperty("--yesScale", yesScale.toFixed(3));
-    doShake();
+        // fade after enough clicks
+        const fadeStart = 4;
+        const fadeEnd = 7; // becomes basically gone at 7
+        if (noClicks >= fadeStart){
+          const t = Math.min((noClicks - fadeStart) / (fadeEnd - fadeStart), 1);
+          const opacity = (1 - t) * 1; // 1 -> 0
+          setVar("--no-opacity", opacity.toFixed(3));
+          if (t >= 1){
+            noBtn.classList.add("disabled");
+            noBtn.setAttribute("aria-disabled", "true");
+          }
+        }
+      }
 
-    // fade out NO once far
-    if (noX > window.innerWidth * 0.55){
-      root.style.setProperty("--noOpacity", "0");
-      noBtn.style.pointerEvents = "none";
-    }
-  });
+      function updateMessage(){
+        msgEl.textContent = messages[Math.min(noClicks, messages.length - 1)];
+        msgEl.classList.add("show");
+      }
 
-  // ---------- Confetti ----------
-  const canvas = document.getElementById("confetti");
-  const ctx = canvas.getContext("2d", { alpha: true });
-  let pieces = [];
-  let running = false;
-  let rafId = null;
+      noBtn.addEventListener("click", () => {
+        if (noBtn.classList.contains("disabled")) return;
 
-  function resizeCanvas(){
-    const dpr = window.devicePixelRatio || 1;
-    canvas.width = Math.floor(window.innerWidth * dpr);
-    canvas.height = Math.floor(window.innerHeight * dpr);
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  }
-  window.addEventListener("resize", resizeCanvas, { passive: true });
-
-  function rand(min, max){ return Math.random() * (max - min) + min; }
-
-  function spawnConfetti(count=180){
-    pieces = [];
-    for (let i=0;i<count;i++){
-      pieces.push({
-        x: rand(0, window.innerWidth),
-        y: rand(-window.innerHeight, -20),
-        vx: rand(-2.2, 2.2),
-        vy: rand(2.4, 5.4),
-        r:  rand(4, 10),
-        rot: rand(0, Math.PI*2),
-        vr: rand(-0.12, 0.12),
-        c: `hsl(${Math.floor(rand(0,360))} 95% 60%)`
+        updateMessage();
+        pulseYes();
+        moveNo();
+        noClicks++;
       });
-    }
-  }
 
-  function loop(){
-    if (!running) return;
-    ctx.clearRect(0,0,window.innerWidth, window.innerHeight);
+      // YES behavior
+      yesBtn.addEventListener("click", () => {
+        // Hide buttons + message
+        btnRow.classList.add("hidden");
+        msgEl.classList.remove("show");
+        msgEl.textContent = "";
 
-    for (const p of pieces){
-      p.x += p.vx;
-      p.y += p.vy;
-      p.rot += p.vr;
-      p.vy *= 1.002;
+        // Swap GIF + headline
+        gif.src = "yay.gif";
+        gif.alt = "Yay!";
+        headline.textContent = "Best decision ever 💖";
 
-      ctx.save();
-      ctx.translate(p.x, p.y);
-      ctx.rotate(p.rot);
-      ctx.fillStyle = p.c;
-      ctx.fillRect(-p.r/2, -p.r/2, p.r, p.r*0.7);
-      ctx.restore();
+        // Disco overlay + confetti
+        card.classList.add("celebrate");
 
-      if (p.y > window.innerHeight + 30){
-        p.y = rand(-140, -20);
-        p.x = rand(0, window.innerWidth);
-        p.vy = rand(2.4, 5.4);
+        if (!prefersReduced){
+          disco.classList.add("on");
+          runConfetti(2600); // a few seconds
+        } else {
+          // Keep it clean for reduced motion: no disco animation or confetti
+          disco.style.opacity = "0.18";
+        }
+      });
+
+      // Confetti (lightweight canvas)
+      const canvas = document.getElementById("confetti");
+      const ctx = canvas.getContext("2d", { alpha: true });
+
+      function resize(){
+        const dpr = Math.max(1, window.devicePixelRatio || 1);
+        canvas.width = Math.floor(window.innerWidth * dpr);
+        canvas.height = Math.floor(window.innerHeight * dpr);
+        canvas.style.width = window.innerWidth + "px";
+        canvas.style.height = window.innerHeight + "px";
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       }
-    }
-    rafId = requestAnimationFrame(loop);
-  }
+      window.addEventListener("resize", resize, { passive: true });
+      resize();
 
-  function startConfetti(ms=4200){
-    resizeCanvas();
-    spawnConfetti(190);
-    running = true;
-    canvas.classList.add("on");
-    loop();
-    window.setTimeout(stopConfetti, ms);
-  }
+      function runConfetti(durationMs){
+        canvas.classList.add("on");
 
-  function stopConfetti(){
-    running = false;
-    if (rafId) cancelAnimationFrame(rafId);
-    rafId = null;
-    canvas.classList.remove("on");
-    ctx.clearRect(0,0,window.innerWidth, window.innerHeight);
-  }
+        const W = window.innerWidth;
+        const H = window.innerHeight;
 
-  // YES click
-  yesBtn.addEventListener("click", () => {
-    // remove buttons
-    yesBtn.style.display = "none";
-    noBtn.style.display = "none";
+        const colors = ["#ff3d7f","#ff7ab6","#ffd166","#06d6a0","#118ab2","#9b5de5"];
+        const pieces = [];
+        const count = 120;
 
-    // remove "sure?" text line
-    msgEl.textContent = "";
-    msgEl.style.display = "none";
+        for (let i=0;i<count;i++){
+          pieces.push({
+            x: Math.random()*W,
+            y: -20 - Math.random()*H*0.3,
+            w: 6 + Math.random()*6,
+            h: 8 + Math.random()*10,
+            vx: -1.6 + Math.random()*3.2,
+            vy: 2.2 + Math.random()*3.4,
+            rot: Math.random()*Math.PI,
+            vr: -0.18 + Math.random()*0.36,
+            color: colors[(Math.random()*colors.length)|0],
+            alpha: 1
+          });
+        }
 
-    // update title
-    titleEl.textContent = "Best decision ever 😭💖";
+        const start = performance.now();
 
-    // swap gif
-    gifImg.style.opacity = "1";
-    gifImg.src = YES_GIF;
-    gifImg.onerror = () => {
-      gifImg.alt = "(Füge yay.gif neben die Datei oder nutze eine URL)";
-      gifImg.style.opacity = .2;
-    };
+        function frame(t){
+          const elapsed = t - start;
+          ctx.clearRect(0, 0, W, H);
 
-    // disco on
-    root.style.setProperty("--bgA", "1");
-    root.style.setProperty("--shake", "0deg");
-    root.style.setProperty("--yesScale", "1");
+          // Fade near end
+          const fade = Math.max(0, Math.min(1, 1 - (elapsed - (durationMs*0.72)) / (durationMs*0.28)));
 
-    // confetti
-    startConfetti(5200);
-  });
-</script>
+          for (const p of pieces){
+            p.x += p.vx;
+            p.y += p.vy;
+            p.rot += p.vr;
 
+            // a bit of drift
+            p.vx *= 0.999;
+            p.vy = Math.min(p.vy + 0.02, 7);
+
+            // wrap
+            if (p.y > H + 30) p.y = -20;
+            if (p.x < -40) p.x = W + 40;
+            if (p.x > W + 40) p.x = -40;
+
+            ctx.save();
+            ctx.globalAlpha = p.alpha * fade;
+            ctx.translate(p.x, p.y);
+            ctx.rotate(p.rot);
+            ctx.fillStyle = p.color;
+            ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+            ctx.restore();
+          }
+
+          if (elapsed < durationMs){
+            requestAnimationFrame(frame);
+          } else {
+            ctx.clearRect(0, 0, W, H);
+            canvas.classList.remove("on");
+          }
+        }
+
+        requestAnimationFrame(frame);
+      }
+    })();
+  </script>
 </body>
 </html>
+```
