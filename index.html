@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Will you be my Valentine? 💘</title>
+  <style>
+    :root{
+      --bg1:#0f0c29; --bg2:#302b63; --bg3:#24243e;
+      --card:#ffffff12; --border:#ffffff22;
+      --text:#fff; --muted:#ffffffb0;
+      --yes:#22c55e; --no:#ef4444;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; min-height:100vh;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      color:var(--text);
+      background: radial-gradient(1200px 700px at 20% 20%, #ff4d6d33, transparent 60%),
+                  radial-gradient(900px 600px at 80% 10%, #ffd16633, transparent 55%),
+                  linear-gradient(135deg,var(--bg1),var(--bg2),var(--bg3));
+      display:flex; align-items:center; justify-content:center;
+      padding:24px;
+      overflow:hidden;
+    }
+    .hearts{
+      position:fixed; inset:0; pointer-events:none;
+      opacity:.18;
+      background-image:
+        radial-gradient(circle at 10% 20%, #ff4d6d 0 2px, transparent 3px),
+        radial-gradient(circle at 70% 10%, #ff4d6d 0 2px, transparent 3px),
+        radial-gradient(circle at 30% 80%, #ffd166 0 2px, transparent 3px),
+        radial-gradient(circle at 90% 70%, #ff4d6d 0 2px, transparent 3px);
+      filter: blur(0.2px);
+      animation: floatBg 6s ease-in-out infinite alternate;
+    }
+    @keyframes floatBg{ to { transform: translateY(-8px) } }
+
+    .card{
+      width:min(560px, 100%);
+      background: var(--card);
+      border:1px solid var(--border);
+      border-radius:24px;
+      padding:28px;
+      box-shadow: 0 20px 60px #00000055;
+      backdrop-filter: blur(10px);
+      text-align:center;
+      position:relative;
+    }
+    h1{margin:0 0 10px; font-size: clamp(26px, 4vw, 38px); letter-spacing:.2px}
+    p{margin:0 0 18px; color:var(--muted); font-size: 15px; line-height:1.4}
+    .gif{
+      width: min(320px, 80%);
+      aspect-ratio: 1 / 1;
+      border-radius:18px;
+      border:1px solid var(--border);
+      overflow:hidden;
+      margin: 16px auto 18px;
+      display:grid;
+      place-items:center;
+      background: #00000022;
+      position:relative;
+    }
+    .gif img{
+      width:100%; height:100%;
+      object-fit:cover;
+      display:block;
+    }
+    .gif .hint{
+      position:absolute; inset:auto 10px 10px 10px;
+      font-size:12px; color:#ffffffc8;
+      background:#00000055;
+      border:1px solid #ffffff22;
+      border-radius:999px;
+      padding:6px 10px;
+      backdrop-filter: blur(6px);
+    }
+
+    .buttons{
+      display:flex; gap:14px; justify-content:center; flex-wrap:wrap;
+      margin-top: 10px;
+    }
+    button{
+      border:0;
+      padding: 12px 18px;
+      border-radius: 999px;
+      font-weight:700;
+      font-size:16px;
+      cursor:pointer;
+      transition: transform .12s ease, filter .12s ease, opacity .12s ease;
+      box-shadow: 0 10px 26px #00000040;
+      user-select:none;
+    }
+    button:active{ transform: translateY(1px) scale(0.99); }
+    .yes{
+      background: linear-gradient(180deg, #34d399, var(--yes));
+      color:#052e16;
+      transform: scale(var(--yesScale, 1));
+    }
+    .no{
+      background: linear-gradient(180deg, #fb7185, var(--no));
+      color:#3f0a0a;
+      opacity: var(--noOpacity, 1);
+      transform: scale(var(--noScale, 1));
+    }
+    .msg{
+      margin-top:14px;
+      min-height: 22px;
+      font-size:14px;
+      color:#ffffffd0;
+    }
+
+    .result{
+      display:none;
+      margin-top: 12px;
+      padding: 14px 16px;
+      border-radius: 18px;
+      border:1px solid var(--border);
+      background:#ffffff10;
+    }
+    .result h2{ margin:0 0 6px; font-size:20px }
+    .result p{ margin:0; color:#ffffffd0 }
+
+    /* confetti (simple hearts) */
+    .pop{
+      position:fixed;
+      font-size:22px;
+      animation: pop 900ms ease forwards;
+      pointer-events:none;
+      filter: drop-shadow(0 10px 12px #00000066);
+    }
+    @keyframes pop{
+      0%{ transform: translate(-50%,-50%) scale(.6); opacity:0 }
+      15%{ opacity:1 }
+      100%{ transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1.1); opacity:0 }
+    }
+  </style>
+</head>
+<body>
+  <div class="hearts"></div>
+
+  <main class="card">
+    <h1>Will you be my Valentine? 💘</h1>
+    <p>Nur eine Frage… und sie entscheidet über unser Schicksal 😌</p>
+
+    <div class="gif">
+      <!-- OPTION A: Lokale Datei: pack eine Datei "valentine.gif" neben index.html -->
+      <img id="gif" src="valentine.gif" alt="valentine gif" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
+      <div style="display:none; padding:18px; color:#ffffffcc; font-size:14px;">
+        GIF fehlt gerade 😅<br>
+        Lege eine Datei <b>valentine.gif</b> neben diese HTML oder nutze eine GIF-URL.
+      </div>
+      <div class="hint">Tipp: valentine.gif daneben legen</div>
+    </div>
+
+    <div class="buttons">
+      <button class="yes" id="yesBtn">Yes 💚</button>
+      <button class="no" id="noBtn">No 🙃</button>
+    </div>
+
+    <div class="msg" id="msg"></div>
+
+    <div class="result" id="result">
+      <h2>Yesss! 🥹💞</h2>
+      <p>Ok, dann ist es offiziell. Ich hol dich ab. 😌</p>
+    </div>
+  </main>
+
+  <script>
+    const root = document.documentElement;
+    const yesBtn = document.getElementById("yesBtn");
+    const noBtn  = document.getElementById("noBtn");
+    const msg    = document.getElementById("msg");
+    const result = document.getElementById("result");
+
+    const noMessages = [
+      "You sure? 😭",
+      "Glaube du hast dich verdrückt…",
+      "Nochmal überlegen 🙃",
+      "Bitte nicht… 🥺",
+      "Letzte Chance 😌",
+      "Ok ich mach’s dir leichter…",
+      "Bro… wirklich? 💔",
+      "Du willst doch eigentlich Yes drücken."
+    ];
+
+    let noCount = 0;
+    let yesScale = 1;
+    let noScale  = 1;
+
+    function setScales(){
+      root.style.setProperty("--yesScale", yesScale.toFixed(3));
+      root.style.setProperty("--noScale",  noScale.toFixed(3));
+    }
+
+    function popHearts(n=10){
+      for(let i=0;i<n;i++){
+        const s = document.createElement("div");
+        s.className = "pop";
+        s.textContent = Math.random() < 0.7 ? "💘" : "💞";
+        const x = Math.random()*window.innerWidth;
+        const y = Math.random()*window.innerHeight;
+        const dx = (Math.random()*2-1) * 220 + "px";
+        const dy = (Math.random()*2-1) * 180 + "px";
+        s.style.left = x + "px";
+        s.style.top  = y + "px";
+        s.style.setProperty("--dx", dx);
+        s.style.setProperty("--dy", dy);
+        document.body.appendChild(s);
+        setTimeout(()=>s.remove(), 950);
+      }
+    }
+
+    function lockNo(){
+      // Wenn Yes groß genug ist, No praktisch unclickable / unsichtbar machen
+      if(yesScale >= 3.2){
+        noBtn.disabled = true;
+        root.style.setProperty("--noOpacity", "0.15");
+      }
+      if(yesScale >= 4.0){
+        root.style.setProperty("--noOpacity", "0");
+        noBtn.style.pointerEvents = "none";
+      }
+    }
+
+    noBtn.addEventListener("click", () => {
+      noCount++;
+
+      msg.textContent = noMessages[Math.min(noCount-1, noMessages.length-1)];
+
+      // Yes wächst, No schrumpft
+      yesScale = Math.min(yesScale + 0.35, 5.0);
+      noScale  = Math.max(noScale - 0.08, 0.72);
+
+      setScales();
+      lockNo();
+
+      // kleines “feedback”
+      popHearts(4);
+    });
+
+    yesBtn.addEventListener("click", () => {
+      msg.textContent = "";
+      result.style.display = "block";
+      popHearts(18);
+
+      // Buttons deaktivieren
+      yesBtn.disabled = true;
+      noBtn.disabled  = true;
+      yesBtn.style.filter = "brightness(1.05)";
+      noBtn.style.opacity = "0";
+      noBtn.style.pointerEvents = "none";
+    });
+
+    // initial
+    setScales();
+  </script>
+</body>
+</html>
