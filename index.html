@@ -329,7 +329,35 @@
 
     // ---------- YES click ----------
     yesBtn.addEventListener("click", () => {
- 
+  // Buttons komplett ausblenden
+  yesBtn.style.display = "none";
+  noBtn.style.display  = "none";
+
+  // Message-Text entfernen
+  msgEl.textContent = "";
+  msgEl.style.display = "none";
+
+  // Titel ändern
+  titleEl.textContent = "Best decision ever 😭💖";
+
+  // GIF wechseln
+  gifImg.src = YES_GIF;
+  gifImg.onerror = () => {
+    gifImg.alt = "(Füge yay.gif neben die Datei oder nutze eine URL)";
+    gifImg.style.opacity = .2;
+  };
+
+  // Shake stoppen + Scale reset
+  root.style.setProperty("--shake", "0deg");
+  root.style.setProperty("--yesScale", "1");
+
+  // Disco Background an
+  root.style.setProperty("--bgA", "1");
+
+  // Konfetti starten
+  startConfetti(4200);
+});
+
 
       // hide NO
       noBtn.style.opacity = "0";
