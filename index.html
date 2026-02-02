@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>Valentine 💘</title>
+
   <style>
     :root{
       --max: 520px;
@@ -16,374 +17,247 @@
 
     *{ box-sizing:border-box; }
     html, body { height: 100%; }
+
     body{
       margin:0;
       background:#fff;
       color:#111;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
       -webkit-font-smoothing: antialiased;
-      text-rendering: optimizeLegibility;
-      overflow: hidden; /* no scroll */
-      position: relative;
+      overflow:hidden;
+      position:relative;
     }
 
-    /* Disco layer (hidden until YES) */
+    /* Disco overlay */
     .disco{
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      opacity: var(--bgA);
-      transition: opacity 280ms ease;
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      opacity:var(--bgA);
+      transition:opacity .3s ease;
       background:
         radial-gradient(circle at 20% 30%, rgba(255,0,150,.55), transparent 35%),
         radial-gradient(circle at 80% 20%, rgba(0,200,255,.50), transparent 40%),
         radial-gradient(circle at 70% 80%, rgba(255,230,0,.45), transparent 38%),
-        radial-gradient(circle at 25% 75%, rgba(0,255,140,.45), transparent 40%),
-        linear-gradient(120deg, rgba(0,0,0,.15), rgba(0,0,0,.05));
-      filter: blur(0px) saturate(1.2);
+        radial-gradient(circle at 25% 75%, rgba(0,255,140,.45), transparent 40%);
+      mix-blend-mode:screen;
       animation: discoMove 1.4s linear infinite;
-      mix-blend-mode: screen;
     }
+
     @keyframes discoMove{
-      0%   { transform: translate3d(0,0,0) scale(1); }
-      50%  { transform: translate3d(10px,-10px,0) scale(1.03); }
-      100% { transform: translate3d(0,0,0) scale(1); }
+      0%{transform:translate(0,0)}
+      50%{transform:translate(10px,-10px)}
+      100%{transform:translate(0,0)}
     }
 
     .wrap{
-      min-height: 100svh;
+      min-height:100svh;
       display:flex;
       align-items:center;
       justify-content:center;
-      padding: 24px 18px;
-      position: relative;
-      z-index: 2;
+      padding:24px 18px;
+      position:relative;
+      z-index:2;
     }
 
     .card{
-      width: min(var(--max), 100%);
+      width:min(var(--max),100%);
       display:flex;
       flex-direction:column;
       align-items:center;
       text-align:center;
-      gap: 14px;
+      gap:14px;
     }
 
     .gif{
-      width: min(320px, 82vw);
-      border-radius: 16px;
+      width:min(320px,82vw);
+      border-radius:16px;
       overflow:hidden;
       background:#f4f4f4;
-      box-shadow: 0 12px 40px rgba(0,0,0,.08);
-    }
-    .gif img{
-      width:100%;
-      height:auto;
-      display:block;
+      box-shadow:0 12px 40px rgba(0,0,0,.08);
     }
 
+    .gif img{ width:100%; display:block; }
+
     h1{
-      margin: 0;
-      font-size: 22px;
-      font-weight: 800;
-      letter-spacing: 0.2px;
+      margin:0;
+      font-size:22px;
+      font-weight:800;
     }
 
     .msg{
-      min-height: 20px;
-      font-size: 14px;
-      color: #444;
-      margin-top: -4px;
+      min-height:20px;
+      font-size:14px;
+      color:#444;
     }
 
     .buttons{
-      margin-top: 6px;
       display:flex;
-      gap: 12px;
-      align-items:center;
+      gap:12px;
       justify-content:center;
-      flex-wrap: wrap;
     }
 
     button{
-      border: 1px solid #111;
-      background: #fff;
-      color:#111;
-      padding: 10px 16px;
-      border-radius: 999px;
-      font-size: 16px;
-      font-weight: 800;
+      border:1px solid #111;
+      background:#fff;
+      padding:10px 16px;
+      border-radius:999px;
+      font-size:16px;
+      font-weight:800;
       cursor:pointer;
-      touch-action: manipulation;
-      user-select:none;
-      transition: transform 140ms ease, background 140ms ease, color 140ms ease;
     }
-    button:active{ transform: scale(0.98); }
 
     #yesBtn{
-      transform: scale(var(--yesScale)) rotate(var(--shake));
-      transform-origin: center;
-      will-change: transform;
+      transform:scale(var(--yesScale)) rotate(var(--shake));
+      transform-origin:center;
     }
 
     #noBtn{
-      transform: translateX(var(--noX));
-      opacity: var(--noOpacity);
-      will-change: transform, opacity;
-      transition: transform 160ms ease, opacity 180ms ease;
+      transform:translateX(var(--noX));
+      opacity:var(--noOpacity);
+      transition:transform .16s ease, opacity .18s ease;
     }
 
-    /* Confetti canvas */
     #confetti{
-      position: fixed;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 3;
-      opacity: 0;
-      transition: opacity 220ms ease;
+      position:fixed;
+      inset:0;
+      width:100%;
+      height:100%;
+      pointer-events:none;
+      z-index:3;
+      opacity:0;
+      transition:.2s;
     }
-    #confetti.on{ opacity: 1; }
-
-    /* Reduced motion */
-    @media (prefers-reduced-motion: reduce){
-      #yesBtn, #noBtn, .disco, #confetti { transition: none; animation: none; }
-    }
+    #confetti.on{opacity:1}
   </style>
 </head>
+
 <body>
-  <div class="disco" aria-hidden="true"></div>
-  <canvas id="confetti" aria-hidden="true"></canvas>
 
-  <main class="wrap">
-    <section class="card" aria-label="Valentine question">
-      <div class="gif">
-        <img id="gifImg" src="valentine.gif" alt="Valentine gif"
-             onerror="this.alt='(Füge valentine.gif neben die Datei oder nutze eine URL)'; this.style.opacity=.2;" />
-      </div>
+<div class="disco"></div>
+<canvas id="confetti"></canvas>
 
-      <h1 id="title">Will you be my valentine? 💘</h1>
-      <div class="msg" id="msg"></div>
+<main class="wrap">
+  <section class="card">
+    <div class="gif">
+      <img id="gifImg" src="valentine.gif">
+    </div>
 
-      <div class="buttons">
-        <button id="yesBtn">Yes</button>
-        <button id="noBtn">No</button>
-      </div>
-    </section>
-  </main>
+    <h1 id="title">Will you be my valentine? 💘</h1>
+    <div class="msg" id="msg"></div>
 
-  <script>
-    const root = document.documentElement;
+    <div class="buttons">
+      <button id="yesBtn">Yes</button>
+      <button id="noBtn">No</button>
+    </div>
+  </section>
+</main>
 
-    const yesBtn = document.getElementById("yesBtn");
-    const noBtn  = document.getElementById("noBtn");
-    const msgEl  = document.getElementById("msg");
-    const titleEl= document.getElementById("title");
-    const gifImg = document.getElementById("gifImg");
-    const disco  = document.querySelector(".disco");
+<script>
+const root=document.documentElement;
+const yesBtn=yesBtn=document.getElementById("yesBtn");
+const noBtn=document.getElementById("noBtn");
+const msgEl=document.getElementById("msg");
+const titleEl=document.getElementById("title");
+const gifImg=document.getElementById("gifImg");
 
-    // CHANGE THESE:
-    const START_GIF = "valentine.gif";
-    const YES_GIF   = "yay.gif"; // <--- add your "new gif" file OR set a URL
+const START_GIF="valentine.gif";
+const YES_GIF="yay.gif";
 
-    const noMessages = [
-      "Sicher? 🤨",
-      "Ich glaube, du hast dich verdrückt 😭",
-      "Ok ok… aber überleg nochmal 🥺",
-      "Das bricht mir das Herz 💔",
-      "Letzte Chance… bitte? 😇",
-      "No ist keine Option 😌"
-    ];
+const noMessages=[
+"Sicher? 🤨",
+"Du hast dich verdrückt 😭",
+"Überleg nochmal 🥺",
+"Das bricht mein Herz 💔",
+"Letzte Chance 😇",
+"No ist keine Option 😌"
+];
 
-    let yesScale = 1;
-    let noClicks = 0;
-    let noX = 0;
+let yesScale=1,noClicks=0,noX=0;
 
-    // lightweight shake
-    let shakeTimer = null;
-    function doShake() {
-      if (shakeTimer) return;
-      let t = 0;
-      shakeTimer = setInterval(() => {
-        const angle = (t % 2 === 0) ? -2.5 : 2.5;
-        root.style.setProperty("--shake", angle + "deg");
-        t++;
-        if (t > 8) {
-          clearInterval(shakeTimer);
-          shakeTimer = null;
-          root.style.setProperty("--shake", "0deg");
-        }
-      }, 60);
-    }
+/* shake */
+function shake(){
+let t=0;
+const id=setInterval(()=>{
+root.style.setProperty("--shake",(t%2?-3:3)+"deg");
+if(++t>8){clearInterval(id);root.style.setProperty("--shake","0deg")}
+},60);
+}
 
-    function clamp(n, min, max){ return Math.max(min, Math.min(max, n)); }
+noBtn.onclick=()=>{
+noClicks++;
+msgEl.textContent=noMessages[Math.min(noClicks-1,noMessages.length-1)];
 
-    function showNoMessage() {
-      const i = Math.min(noClicks - 1, noMessages.length - 1);
-      msgEl.textContent = noMessages[i];
-    }
+noX+=Math.max(24,window.innerWidth*.08);
+root.style.setProperty("--noX",noX+"px");
 
-    noBtn.addEventListener("click", () => {
-      noClicks++;
+yesScale=Math.min(yesScale+.22,3.8);
+root.style.setProperty("--yesScale",yesScale);
+shake();
 
-      // Message updates
-      showNoMessage();
+if(noX>window.innerWidth*.55){
+root.style.setProperty("--noOpacity","0");
+noBtn.style.pointerEvents="none";
+}
+};
 
-      // NO slides out step by step
-      const step = Math.max(24, Math.floor(window.innerWidth * 0.08));
-      noX += step;
+/* -------- YES -------- */
+yesBtn.onclick=()=>{
+yesBtn.style.display="none";
+noBtn.style.display="none";
+msgEl.style.display="none";
 
-      // YES grows + shakes
-      yesScale = clamp(yesScale + 0.22, 1, 3.8);
-      root.style.setProperty("--yesScale", yesScale.toFixed(3));
-      doShake();
+titleEl.textContent="Best decision ever 😭💖";
+gifImg.src=YES_GIF;
 
-      root.style.setProperty("--noX", noX + "px");
+root.style.setProperty("--bgA","1");
+startConfetti();
+};
 
-      // fade & disable once far
-      if (noX > window.innerWidth * 0.55) {
-        root.style.setProperty("--noOpacity", "0");
-        noBtn.style.pointerEvents = "none";
-      }
-    });
+/* -------- CONFETTI -------- */
+const canvas=document.getElementById("confetti");
+const ctx=canvas.getContext("2d");
+let pieces=[];
 
-    // ---------- Confetti (no library) ----------
-    const canvas = document.getElementById("confetti");
-    const ctx = canvas.getContext("2d", { alpha: true });
-    let confettiRunning = false;
-    let pieces = [];
-    let rafId = null;
+function resize(){
+canvas.width=innerWidth;
+canvas.height=innerHeight;
+}
+resize();
+addEventListener("resize",resize);
 
-    function resizeCanvas(){
-      canvas.width = Math.floor(window.innerWidth * devicePixelRatio);
-      canvas.height = Math.floor(window.innerHeight * devicePixelRatio);
-      ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
-    }
-    window.addEventListener("resize", resizeCanvas, { passive:true });
-
-    function rand(min, max){ return Math.random() * (max - min) + min; }
-
-    function spawnConfetti(count=160){
-      pieces = [];
-      const w = window.innerWidth;
-      for(let i=0;i<count;i++){
-        pieces.push({
-          x: rand(0, w),
-          y: rand(-window.innerHeight, -20),
-          r: rand(4, 10),
-          vx: rand(-2.2, 2.2),
-          vy: rand(2.4, 5.5),
-          rot: rand(0, Math.PI*2),
-          vr: rand(-0.12, 0.12),
-          // bright random colors
-          c: `hsl(${Math.floor(rand(0,360))} 95% 60%)`,
-        });
-      }
-    }
-
-    function drawConfetti(){
-      if(!confettiRunning) return;
-      ctx.clearRect(0,0,window.innerWidth, window.innerHeight);
-
-      for(const p of pieces){
-        p.x += p.vx;
-        p.y += p.vy;
-        p.rot += p.vr;
-        p.vy *= 1.002; // slight accel
-        p.vx *= 0.999;
-
-        ctx.save();
-        ctx.translate(p.x, p.y);
-        ctx.rotate(p.rot);
-        ctx.fillStyle = p.c;
-        ctx.fillRect(-p.r/2, -p.r/2, p.r, p.r*0.65);
-        ctx.restore();
-
-        // wrap / respawn
-        if(p.y > window.innerHeight + 30){
-          p.y = rand(-120, -20);
-          p.x = rand(0, window.innerWidth);
-          p.vy = rand(2.4, 5.5);
-        }
-      }
-      rafId = requestAnimationFrame(drawConfetti);
-    }
-
-    function startConfetti(ms=3500){
-      resizeCanvas();
-      spawnConfetti(190);
-      confettiRunning = true;
-      canvas.classList.add("on");
-      drawConfetti();
-      window.setTimeout(() => stopConfetti(), ms);
-    }
-
-    function stopConfetti(){
-      confettiRunning = false;
-      if(rafId) cancelAnimationFrame(rafId);
-      rafId = null;
-      canvas.classList.remove("on");
-      ctx.clearRect(0,0,window.innerWidth, window.innerHeight);
-    }
-
-    // ---------- YES click ----------
-    yesBtn.addEventListener("click", () => {
-  // Buttons komplett ausblenden
-  yesBtn.style.display = "none";
-  noBtn.style.display  = "none";
-
-  // Message-Text entfernen
-  msgEl.textContent = "";
-  msgEl.style.display = "none";
-
-  // Titel ändern
-  titleEl.textContent = "Best decision ever 😭💖";
-
-  // GIF wechseln
-  gifImg.src = YES_GIF;
-  gifImg.onerror = () => {
-    gifImg.alt = "(Füge yay.gif neben die Datei oder nutze eine URL)";
-    gifImg.style.opacity = .2;
-  };
-
-  // Shake stoppen + Scale reset
-  root.style.setProperty("--shake", "0deg");
-  root.style.setProperty("--yesScale", "1");
-
-  // Disco Background an
-  root.style.setProperty("--bgA", "1");
-
-  // Konfetti starten
-  startConfetti(4200);
+function spawn(){
+pieces=[];
+for(let i=0;i<180;i++){
+pieces.push({
+x:Math.random()*innerWidth,
+y:Math.random()*-innerHeight,
+vy:2+Math.random()*3,
+vx:-2+Math.random()*4,
+r:4+Math.random()*6,
+c:`hsl(${Math.random()*360} 100% 60%)`
 });
+}
+}
 
+function draw(){
+ctx.clearRect(0,0,innerWidth,innerHeight);
+for(const p of pieces){
+p.x+=p.vx;
+p.y+=p.vy;
+ctx.fillStyle=p.c;
+ctx.fillRect(p.x,p.y,p.r,p.r);
+if(p.y>innerHeight)p.y=-20;
+}
+requestAnimationFrame(draw);
+}
 
-      // hide NO
-      noBtn.style.opacity = "0";
-      noBtn.style.pointerEvents = "none";
-
-      // reset shake + set a nice scale
-      root.style.setProperty("--shake", "0deg");
-      root.style.setProperty("--yesScale", "1.25");
-
-
-      // swap gif
-      gifImg.src = YES_GIF;
-      gifImg.onerror = () => {
-        gifImg.alt = "(Füge yay.gif neben die Datei oder nutze eine URL)";
-        gifImg.style.opacity = .2;
-      };
-
-      // disco background ON
-      root.style.setProperty("--bgA", "1");
-
-      // confetti
-      startConfetti(4200);
-    });
-
-    // set initial gif
-    gifImg.src = START_GIF;
-  </script>
+function startConfetti(){
+canvas.classList.add("on");
+spawn();
+draw();
+setTimeout(()=>canvas.classList.remove("on"),4000);
+}
+</script>
 </body>
 </html>
